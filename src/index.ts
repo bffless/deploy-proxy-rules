@@ -1,29 +1,37 @@
 /**
- * Build spike (Task D1): prove that an ncc-bundled CJS action can import the ESM
- * `bffless/lib` barrel and reference its exports at runtime, without throwing
- * ERR_REQUIRE_ESM or any module-resolution error.
+ * Action entry point: `getInputs` → `runSets` (validate + push each configured rule-set
+ * directory) → outputs/step-summary/PR-comment. Mirrors `@bffless/upload-artifact`'s
+ * `run()` shape.
  *
- * D2+ replaces this wholesale with the real action entry point (getInputs → per-set
- * validate/push loop → outputs/summary/PR comment). Keep `run()` as the single
- * exported entry so that replacement is a drop-in.
+ * `bffless/lib` is never imported here, directly or dynamically — `run-sets.ts` owns the
+ * single memoized `await import('bffless/lib')` (see its header comment for the recipe
+ * and why a static import would throw `ERR_REQUIRE_ESM` from this ncc-bundled CJS action).
+ *
+ * `run` stays a named export, and the auto-invoke is gated behind
+ * `require.main === module`, so `__tests__/index.test.ts` can import `run` without
+ * triggering it (it would otherwise call `core.setFailed` + `process.exit(1)` outside a
+ * real Actions environment, killing the test process).
  */
 import * as core from '@actions/core';
+import { getInputs } from './inputs';
+import { runSets, toOutputs } from './run-sets';
+import { writeSummary } from './summary';
+import { writePrComment } from './pr-comment';
 
 export async function run(): Promise<void> {
   try {
-    // Dynamic import: `bffless/lib` is a pure ESM barrel (package.json `"type": "module"`,
-    // exports map `"./lib": "./dist/lib.js"`). ncc bundles this call unresolved and Node
-    // performs it at runtime — the only way to load ESM from a CJS-emitting bundle.
-    const lib = await import('bffless/lib');
-    core.info(`bffless/lib loaded. typeof runPushOne = ${typeof lib.runPushOne}`);
-
-    // Read the one required input the real action will need first, so the spike also
-    // exercises the "fail gracefully via @actions/core" path when run outside Actions
-    // (no INPUT_PATH env set): core.getInput throws, we catch below and setFailed.
-    const path = core.getInput('path', { required: true });
-    core.info(`path input: ${path}`);
+    const inputs = getInputs();
+    const results = await runSets(inputs);
+    const out = toOutputs(results);
+    core.setOutput('rule-set-ids', out.ruleSetIds);
+    core.setOutput('rule-set-names', out.ruleSetNames);
+    core.setOutput('changed', String(out.changed));
+    core.setOutput('report', out.report);
+    await writeSummary(inputs, results);
+    await writePrComment(inputs, results);
   } catch (error) {
-    core.setFailed(error instanceof Error ? error.message : String(error));
+    core.setFailed(error instanceof Error ? error.message : 'Unknown error');
+    process.exit(1);
   }
 }
 
