@@ -1,0 +1,2 @@
+proxyType: external_proxy
+targetUrl: http://example.com/items
