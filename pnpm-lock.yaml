@@ -15,8 +15,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       bffless:
-        specifier: file:../ce/packages/cli
-        version: file:../ce/packages/cli
+        specifier: ^0.1.0
+        version: 0.1.0
     devDependencies:
       '@types/node':
         specifier: ^20.11.0
@@ -433,8 +433,8 @@ packages:
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  bffless@file:../ce/packages/cli:
-    resolution: {directory: ../ce/packages/cli, type: directory}
+  bffless@0.1.0:
+    resolution: {integrity: sha512-ATWTxHbtR1gkEPbD3QpyxhRJCLodlueJEdNX8HIYLDIkx8gC/sca/ZhNj8wTMLQ+1UJqM04B7DlbG22on0A+VQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -1049,7 +1049,7 @@ snapshots:
 
   before-after-hook@2.2.3: {}
 
-  bffless@file:../ce/packages/cli:
+  bffless@0.1.0:
     dependencies:
       commander: 12.1.0
       yaml: 2.9.0

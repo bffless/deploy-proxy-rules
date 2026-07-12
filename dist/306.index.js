@@ -1,6 +1,6 @@
 "use strict";
-exports.id = 328;
-exports.ids = [328];
+exports.id = 306;
+exports.ids = [306];
 exports.modules = {
 
 /***/ 3904:
@@ -8567,7 +8567,7 @@ exports.visitAsync = visitAsync;
 
 /***/ }),
 
-/***/ 5328:
+/***/ 306:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 // ESM COMPAT FLAG
@@ -12806,7 +12806,7 @@ const coerce = {
 
 const NEVER = (/* unused pure expression or super */ null && (INVALID));
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/manifest.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/manifest.js
 
 
 
@@ -13013,7 +13013,7 @@ function parseYamlFile(filePath, schema) {
     return result.data;
 }
 //# sourceMappingURL=manifest.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/routes.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/routes.js
 /**
  * Bidirectional mapping between proxy-rule pathPatterns (e.g. `/api/auth/*`) and authoring-layout
  * filesystem segments (e.g. `['api', 'auth', '[...path]']`), plus deterministic specificity
@@ -13162,7 +13162,7 @@ function deriveOrders(rules) {
     return map;
 }
 //# sourceMappingURL=routes.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/defaults.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/defaults.js
 const PIPELINE_TARGET_URL_DEFAULT = 'http://internal/pipeline';
 /** Boilerplate defaults injected by the compiler and elided by the decompiler. */
 const RULE_DEFAULTS = {
@@ -13213,11 +13213,11 @@ function elideRuleDefaults(rule) {
     return out;
 }
 //# sourceMappingURL=defaults.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/types.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/types.js
 const RULE_KEY_ORDER = ['pathPattern', 'method', 'methods', 'targetUrl', 'stripPrefix', 'order', 'timeout', 'preserveHost', 'forwardCookies', 'headerConfig', 'authTransform', 'internalRewrite', 'proxyType', 'emailHandlerConfig', 'pipelineConfig', 'isEnabled', 'debugEnabled', 'description'];
 const ENVELOPE_KEY_ORDER = ['version', 'exportedAt', 'kind', 'ruleSet', 'rules', 'schemas'];
 //# sourceMappingURL=types.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/canonical.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/canonical.js
 
 
 const STEP_KEY_ORDER = ['id', 'name', 'handlerType', 'config', 'isEnabled'];
@@ -13440,7 +13440,7 @@ function exportsEquivalent(a, b) {
     return { equal: diffs.length === 0, diffs };
 }
 //# sourceMappingURL=canonical.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/format/schema-refs.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/format/schema-refs.js
 /**
  * Keys inside a rule's pipeline config (step/postStep `config` objects, canonical or
  * authoring form) that hold a reference to a `pipeline_schemas` row id. Mirror of
@@ -13490,7 +13490,7 @@ function walkSchemaRefs(value, visit) {
     }
 }
 //# sourceMappingURL=schema-refs.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/compile/build.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/compile/build.js
 /**
  * Compiler: authoring layout (`ruleset.yaml` + `rules/` + `schemas/`) → a canonical
  * `RuleSetExport` (the wire format consumed by the DB import). See task-6 brief for the
@@ -13858,7 +13858,7 @@ async function buildRuleSet(setDir, opts) {
     };
 }
 //# sourceMappingURL=build.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/commands/build.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/commands/build.js
 /**
  * `rules build` orchestration: runs `buildRuleSet` over one rule-set directory, writes the
  * canonical export JSON to disk, and reports a one-line summary. Command wiring (commander,
@@ -13900,7 +13900,7 @@ async function buildOne(setDir, opts) {
 //# sourceMappingURL=build.js.map
 // EXTERNAL MODULE: external "node:vm"
 var external_node_vm_ = __webpack_require__(714);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/lint/patterns.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/lint/patterns.js
 
 /**
  * Prohibited patterns for pipeline `function_handler` code, transcribed 1:1
@@ -13987,7 +13987,7 @@ function validateHandlerSource(code) {
     return findings;
 }
 //# sourceMappingURL=patterns.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/commands/validate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/commands/validate.js
 /**
  * `rules validate` orchestration: composes the manifest zod schemas, `buildRuleSet`, the
  * `.fn.js` sandbox lint, and the §3.5 skills cross-ref into one pass over a rule-set
@@ -14292,7 +14292,7 @@ async function validateRuleSet(setDir) {
 var external_node_assert_ = __webpack_require__(4589);
 // EXTERNAL MODULE: external "node:fs/promises"
 var promises_ = __webpack_require__(1455);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/harness/utils.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/harness/utils.js
 
 /**
  * Default signing base for the harness. The runtime derives its key from
@@ -14347,7 +14347,7 @@ function createUtils(signingSecret) {
     };
 }
 //# sourceMappingURL=utils.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/harness/run-handler.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/harness/run-handler.js
 
 
 
@@ -14523,7 +14523,7 @@ async function runHandlerFile(file, data = {}, opts = {}) {
     return runHandler(code, data, opts);
 }
 //# sourceMappingURL=run-handler.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/commands/test.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/commands/test.js
 /**
  * `rules test` orchestration: declarative handler fixtures (`*.fn.test.yaml`) run through
  * the Task 10 `node:vm` harness. Command wiring (commander, process.exit) is Task 13 —
@@ -14645,7 +14645,7 @@ async function runFnTests(setDir) {
     return { passed, failed };
 }
 //# sourceMappingURL=test.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/config.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/config.js
 /**
  * `.bffless/config.json` discovery + rule-set directory resolution.
  *
@@ -14801,7 +14801,7 @@ function resolveRuleSetDirs(cwd, args) {
     return [...dirs].sort();
 }
 //# sourceMappingURL=config.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/api/client.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/api/client.js
 /**
  * Minimal HTTP client for the BFFless backend API (Phase 1 live `pull`/`push`/`diff`).
  *
@@ -14939,7 +14939,7 @@ function createClient(flags, cwd, deps) {
     return new ApiClient({ apiUrl, apiKey, fetchImpl: deps?.fetchImpl });
 }
 //# sourceMappingURL=client.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/api/resolve.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/api/resolve.js
 /**
  * Name → id resolution against the backend's UUID-addressed API.
  *
@@ -15007,7 +15007,7 @@ function requireProject(flagProject, configProject) {
 //# sourceMappingURL=resolve.js.map
 // EXTERNAL MODULE: external "node:child_process"
 var external_node_child_process_ = __webpack_require__(1421);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/api/git-source.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/api/git-source.js
 /**
  * Best-effort `source` provenance for `rules push` — stamped by the server onto the rule
  * set's `source` column so the UI can show "managed from git".
@@ -15079,7 +15079,7 @@ function collectSourceMetadata(setDir, deps) {
     return Object.keys(source).length > 0 ? source : undefined;
 }
 //# sourceMappingURL=git-source.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/commands/push.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/commands/push.js
 /**
  * `rules push` orchestration: compile a rule-set directory in-memory (same compiler as
  * `rules build`, nothing written to `dist/`), then `PUT /api/proxy-rule-sets/project/
@@ -15170,7 +15170,7 @@ async function runPushOne(setDir, opts, cwd, deps) {
     }
 }
 //# sourceMappingURL=push.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/commands/diff.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/commands/diff.js
 /**
  * `rules diff` orchestration — the CI drift-check contract:
  *
@@ -15271,7 +15271,7 @@ async function runDiffOne(setDir, opts, cwd, deps) {
     return { status: 'drift', setName, message: `${setName}: drift detected (local != live)`, diffs };
 }
 //# sourceMappingURL=diff.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/compile/decompile.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/compile/decompile.js
 /**
  * Decompiler: a canonical `RuleSetExport` → the authoring layout (`ruleset.yaml` + `rules/` +
  * `schemas/`). Exact inverse of the compiler (src/compile/build.ts) — its output must recompile
@@ -15473,7 +15473,7 @@ async function writeDecompiled(res, outDir, opts) {
     }
 }
 //# sourceMappingURL=decompile.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@file+..+ce+packages+cli/node_modules/bffless/dist/lib.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.1.0/node_modules/bffless/dist/lib.js
 /**
  * Library entry point (`bffless/lib`) — a pure re-export barrel with no side effects.
  * Unlike `./` (`dist/index.js`), which runs `program.parseAsync()` at module top level,

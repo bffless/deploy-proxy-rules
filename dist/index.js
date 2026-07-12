@@ -30337,7 +30337,7 @@ let libPromise;
  *  module scope awaits the same dynamic import. */
 function loadLib() {
     if (!libPromise)
-        libPromise = __nccwpck_require__.e(/* import() */ 328).then(__nccwpck_require__.bind(__nccwpck_require__, 5328));
+        libPromise = __nccwpck_require__.e(/* import() */ 306).then(__nccwpck_require__.bind(__nccwpck_require__, 306));
     return libPromise;
 }
 function formatIssue(issue) {
