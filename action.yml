@@ -1,0 +1,72 @@
+name: 'BFFless Deploy Proxy Rules'
+description: 'Build, validate and push BFFless proxy rule sets from source'
+author: 'bffless'
+
+branding:
+  icon: 'shuffle'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'One or more rule-set directories (comma or newline separated), each containing ruleset.yaml'
+    required: true
+  api-url:
+    description: 'Base URL of the BFFless hosting platform'
+    required: true
+  api-key:
+    description: 'API key for authentication (X-API-Key header)'
+    required: true
+  project:
+    description: 'Target project (UUID, owner/name, or bare name). Falls back to .bffless/config.json `project`'
+    required: false
+  prune:
+    description: 'Delete rules/schemas on the server that are absent from source'
+    required: false
+    default: 'false'
+  dry-run:
+    description: 'Compute and report the sync without pushing changes'
+    required: false
+    default: 'false'
+  name-suffix:
+    description: 'Suffix appended to each rule set name on push (pushes <name>-<suffix>)'
+    required: false
+  strict-schemas:
+    description: 'Fail on schema warnings instead of only reporting them'
+    required: false
+    default: 'false'
+  working-directory:
+    description: 'Working directory for resolving relative paths'
+    required: false
+    default: '.'
+  summary:
+    description: 'Write a GitHub Step Summary'
+    required: false
+    default: 'true'
+  summary-title:
+    description: 'Title for the step summary'
+    required: false
+    default: 'Proxy Rules Sync'
+  pr-comment:
+    description: 'Post/update a comment on the PR with sync details'
+    required: false
+    default: 'false'
+  comment-header:
+    description: 'Custom header for the PR comment (default: "🔀 BFFless Proxy Rules")'
+    required: false
+  github-token:
+    description: 'GitHub token for posting PR comments (defaults to github.token)'
+    required: false
+
+outputs:
+  rule-set-ids:
+    description: 'Comma-separated rule set IDs, in the order of `path`'
+  rule-set-names:
+    description: 'Comma-separated rule set names, post-suffix'
+  changed:
+    description: '"true" if any rule set had created/updated/deleted non-empty'
+  report:
+    description: 'JSON: [{name, dir, response: SyncResponse}]'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'

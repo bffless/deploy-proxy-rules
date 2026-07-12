@@ -1,0 +1,28 @@
+{
+  "name": "@bffless/deploy-proxy-rules",
+  "version": "0.0.0",
+  "description": "GitHub Action: build, validate and push BFFless proxy rule sets from source",
+  "main": "dist/index.js",
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build": "ncc build src/index.ts -o dist --license licenses.txt",
+    "build:tsc": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write 'src/**/*.ts' '__tests__/**/*.ts'",
+    "format:check": "prettier --check 'src/**/*.ts' '__tests__/**/*.ts'"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "bffless": "file:../ce/packages/cli"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vercel/ncc": "^0.38.1",
+    "prettier": "^3.2.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "license": "SEE LICENSE IN LICENSE.md"
+}
