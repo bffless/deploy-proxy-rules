@@ -27,8 +27,9 @@ jobs:
 
       - name: Check dist is up to date
         run: |
-          if [ -n "$(git diff --name-only dist/)" ]; then
-            echo "::error::dist/ is out of date. Run 'pnpm build' and commit the result."
-            git diff --stat dist/
+          git add -A dist/
+          if ! git diff --cached --quiet dist/; then
+            echo "::error::dist/ is out of date (or has untracked/removed files). Run 'pnpm build' and commit dist/."
+            git status --porcelain dist/
             exit 1
           fi

@@ -101,11 +101,11 @@ jobs:
 > the rule set ID captured from this action's `rule-set-ids` output when the preview was
 > first created).
 
-> **Multiple steps in one job:** if you run more than one `deploy-proxy-rules` step in
-> the same job with `pr-comment: true`, give each a distinct `name-suffix`. The
-> PR-comment marker is keyed on `name-suffix` (not `comment-header`), so steps sharing a
-> `name-suffix` (or both leaving it unset) will overwrite each other's comment instead of
-> posting separately.
+> **Multiple commenting invocations on the same PR:** if you run more than one
+> `deploy-proxy-rules` step with `pr-comment: true` on the same PR (in the same job or
+> across multiple jobs), give each a distinct `name-suffix`. The PR-comment marker is
+> keyed on `name-suffix` (not `comment-header`), so steps sharing a `name-suffix` (or
+> both leaving it unset) will overwrite each other's comment instead of posting separately.
 
 ### Dry run
 
@@ -170,7 +170,7 @@ Step summary output looks like:
 | `summary-title`        | no       | `'Proxy Rules Sync'`   | Title for the step summary                                                                |
 | `pr-comment`           | no       | `'false'`              | Post/update a comment on the PR with sync details                                         |
 | `comment-header`       | no       | --                     | Custom header for the PR comment (default: "🔀 BFFless Proxy Rules")                       |
-| `github-token`         | no       | `github.token`         | GitHub token for posting PR comments (defaults to `github.token`)                         |
+| `github-token`         | no       | `${{ github.token }}`  | GitHub token for posting PR comments (defaults to `github.token`)                         |
 
 Only 3 required inputs (`path`, `api-url`, `api-key`).
 
@@ -178,7 +178,7 @@ Only 3 required inputs (`path`, `api-url`, `api-key`).
 
 | Output           | Description                                            |
 | ----------------- | ------------------------------------------------------- |
-| `rule-set-ids`    | Comma-separated rule set IDs, in the order of `path`     |
+| `rule-set-ids`    | Comma-separated rule set IDs, in the order of `path`. Empty for a set that doesn't exist yet on a dry run.     |
 | `rule-set-names`  | Comma-separated rule set names, post-suffix              |
 | `changed`         | `"true"` if any rule set had created/updated/deleted non-empty |
 | `report`          | JSON: `[{name, dir, response: SyncResponse}]`             |

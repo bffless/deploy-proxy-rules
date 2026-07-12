@@ -56,6 +56,7 @@ inputs:
   github-token:
     description: 'GitHub token for posting PR comments (defaults to github.token)'
     required: false
+    default: ${{ github.token }}
 
 outputs:
   rule-set-ids:
