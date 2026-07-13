@@ -1,6 +1,6 @@
 {
   "name": "@bffless/deploy-proxy-rules",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "GitHub Action: build, validate and push BFFless proxy rule sets from source",
   "main": "dist/index.js",
   "packageManager": "pnpm@10.33.0",
