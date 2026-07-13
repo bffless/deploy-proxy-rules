@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.0.0...v1.1.0) (2026-07-13)
+
+
+### Features
+
+* support TypeScript (.fn.ts) handlers ([1a3434e](https://github.com/bffless/deploy-proxy-rules/commit/1a3434ef15a5b2f196ee4e8506d22bbb89da9e36))
+* support TypeScript (.fn.ts) handlers ([8d1aa09](https://github.com/bffless/deploy-proxy-rules/commit/8d1aa09851b69206c6643bff3b50f109f97c48df)), closes [#2](https://github.com/bffless/deploy-proxy-rules/issues/2)
+
 ## 1.0.0 (2026-07-12)
 
 
