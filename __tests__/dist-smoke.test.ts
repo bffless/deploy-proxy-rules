@@ -21,6 +21,7 @@ import path from 'node:path';
 
 const DIST_ENTRY = path.resolve(__dirname, '../dist/index.js');
 const FIXTURE_DIR = path.resolve(__dirname, 'fixtures/basic');
+const TS_FIXTURE_DIR = path.resolve(__dirname, 'fixtures/ts-handler');
 
 const PROJECT_UUID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const RULE_SET_UUID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
@@ -93,7 +94,8 @@ describe('dist/index.js bundle smoke test', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('runs the real bundle end to end: exit 0, GITHUB_OUTPUT populated, server received the sync PUT', async () => {
+  /** Spawn `dist/index.js` exactly as `actions/runner` would, against `fixtureDir`. */
+  async function runBundle(fixtureDir: string) {
     const githubOutput = path.join(tmpDir, 'github_output');
     const githubSummary = path.join(tmpDir, 'github_step_summary');
     // @actions/core's file-command helper (`issueFileCommand`) requires the target file
@@ -108,7 +110,7 @@ describe('dist/index.js bundle smoke test', () => {
     // node_modules/@actions/core/lib/core.js `getInput`).
     const env = {
       ...process.env,
-      'INPUT_PATH': FIXTURE_DIR,
+      'INPUT_PATH': fixtureDir,
       'INPUT_API-URL': baseUrl,
       'INPUT_API-KEY': 'smoke-test-key',
       'INPUT_PROJECT': 'p',
@@ -128,6 +130,21 @@ describe('dist/index.js bundle smoke test', () => {
       },
     );
 
+    return { ...result, output: () => readFileSync(githubOutput, 'utf8') };
+  }
+
+  /** The sync PUT the action made — the payload that actually reached the wire. */
+  function syncBody() {
+    const syncRequest = requests.find(
+      (r) => r.method === 'PUT' && r.url === `/api/proxy-rule-sets/project/${PROJECT_UUID}/sync`,
+    );
+    expect(syncRequest).toBeDefined();
+    return JSON.parse(syncRequest!.body);
+  }
+
+  it('runs the real bundle end to end: exit 0, GITHUB_OUTPUT populated, server received the sync PUT', async () => {
+    const result = await runBundle(FIXTURE_DIR);
+
     expect(result.stderr).toBe('');
     expect(result.code).toBe(0);
 
@@ -135,20 +152,57 @@ describe('dist/index.js bundle smoke test', () => {
     // (`key<<ghadelimiter_<uuid>\n<value>\nghadelimiter_<uuid>`), not the legacy
     // `key=value` form — verified against node_modules/@actions/core/lib/file-command.js
     // `prepareKeyValueMessage`, not assumed. Match that shape rather than a literal `key=`.
-    const output = readFileSync(githubOutput, 'utf8');
+    const output = result.output();
     expect(output).toMatch(/^changed<<ghadelimiter_/m);
     expect(output).toMatch(/^rule-set-names<<ghadelimiter_/m);
     expect(output).toContain('\nbasic\n');
     expect(output).toContain('\ntrue\n');
 
-    const syncRequest = requests.find(
-      (r) => r.method === 'PUT' && r.url === `/api/proxy-rule-sets/project/${PROJECT_UUID}/sync`,
-    );
-    expect(syncRequest).toBeDefined();
-    const body = JSON.parse(syncRequest!.body);
-    expect(body.ruleSet.name).toBe('basic');
+    expect(syncBody().ruleSet.name).toBe('basic');
 
     const projectsRequest = requests.find((r) => r.method === 'GET' && r.url === '/api/projects');
     expect(projectsRequest).toBeDefined();
+  });
+
+  /**
+   * Regression test for issue #2: the action bundled `bffless@^0.1.0`, whose manifest schema
+   * only accepted `code:` refs ending in `.js`, so every rule set with a TypeScript handler
+   * failed validation ("code must be a relative path ending in .js") before it could push.
+   *
+   * This is deliberately a *bundle* test rather than a `src/*` one. Compiling `.fn.ts` is the
+   * one thing bffless does by shelling out to esbuild's native binary, and ncc bundling a
+   * package that resolves a platform binary at run time is exactly what breaks in `dist/` while
+   * working fine in-process — bumping the dependency alone left the action failing, just with a
+   * more cryptic error (see `src/esbuild-binary.ts`). Asserting on the compiled handler that
+   * reaches the wire is what proves esbuild really ran *inside the artifact Actions executes*.
+   */
+  it('compiles a .fn.ts handler through the bundle and pushes the emitted JS (issue #2)', async () => {
+    const result = await runBundle(TS_FIXTURE_DIR);
+
+    expect(result.stderr).toBe('');
+    expect(result.code).toBe(0);
+
+    const body = syncBody();
+    expect(body.ruleSet.name).toBe('ts-handler');
+
+    // bffless compiles `code: ./compute.fn.ts` and inlines the result at
+    // `rules[].pipelineConfig.steps[].config.code` — assert on that emitted JS, never on the
+    // `.fn.ts` source, which must not survive compilation.
+    const code: string = body.rules[0].pipelineConfig.steps[0].config.code;
+
+    // esbuild's IIFE wrapper plus the tail bffless appends so the sandboxed runtime sees a
+    // top-level `handler`. Their presence means bundleHandler ran, not that types were merely
+    // stripped by something simpler.
+    expect(code).toContain('__bfflessHandler');
+    expect(code).toContain('var handler = __bfflessHandler.default || __bfflessHandler.handler');
+
+    // `pricing.ts` is a *relative import* of the entry: it can only appear here if esbuild
+    // actually followed and inlined it.
+    expect(code).toContain('BFFLESS_TS_FIXTURE_MARKER');
+
+    // TypeScript-only syntax must be gone — no interface, no type-only import left behind.
+    expect(code).not.toContain('interface Item');
+    expect(code).not.toContain('import type');
+    expect(code).not.toContain("from './pricing'");
   });
 });

@@ -1,0 +1,16 @@
+targetUrl: pipeline
+description: Pipeline whose first step is a TypeScript handler, compiled by bffless via esbuild.
+pipeline:
+  name: ts-items
+  steps:
+    - id: compute
+      name: compute
+      handler: function_handler
+      code: ./compute.fn.ts
+    - id: ok
+      name: ok
+      handler: response_handler
+      config:
+        body: '{"total": "{{steps.compute.total}}"}'
+        status: 200
+        contentType: application/json

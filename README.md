@@ -12,6 +12,12 @@ BFFless project.
 (`PUT /api/proxy-rule-sets/project/:projectId/sync`) this action calls ships in that
 version.
 
+**TypeScript handlers need a `linux-x64` runner.** Handlers written in TypeScript
+(`code: ./handler.fn.ts`) are compiled with esbuild, and this action ships an esbuild
+binary for `linux-x64` only — so run it on `ubuntu-latest` (or any `linux-x64` runner).
+Rule sets whose handlers are all `.fn.js` use no compiler and run on any runner. See
+[Development](#development) if you need another platform.
+
 ## Quick Start
 
 Sync a rule set on every push to `main` (typically run alongside
@@ -191,7 +197,8 @@ For each directory in `path` (in order):
    errors fail the run immediately; warnings are logged via `core.warning` and don't stop
    the sync.
 2. **Compiles** the rule set with the same compiler `bffless rules build` uses, applying
-   `name-suffix` to the set's name if provided.
+   `name-suffix` to the set's name if provided. TypeScript handlers (`.fn.ts`) are bundled
+   to JavaScript with esbuild at this point; `.fn.js` handlers are used as-is.
 3. **Syncs** via `PUT /api/proxy-rule-sets/project/:projectId/sync`, honoring `prune`,
    `dry-run` and `strict-schemas`.
 4. **Sets outputs** from the collected results (`rule-set-ids`, `rule-set-names`,
@@ -219,9 +226,26 @@ pnpm install
 pnpm test    # pnpm build && vitest run — every test run exercises a fresh dist/
 ```
 
-The `bffless` dependency currently points at a local `file:` path
-(`../ce/packages/cli`); it switches to the published `bffless` npm package once it's
-released.
+### The vendored esbuild binary
+
+`pnpm build` also writes `dist/vendor/esbuild` (~11MB, committed). This is why:
+bffless compiles `.fn.ts` handlers with esbuild's JS API, and **that API cannot be
+ncc-bundled** — it locates its native executable by a path relative to its own file, so
+once inlined into `dist/` it refuses to run at all. esbuild skips that check when
+`ESBUILD_BINARY_PATH` is set, so we vendor a binary
+(`scripts/vendor-esbuild.mjs`) and point the variable at it
+(`src/esbuild-binary.ts`) before `bffless/lib` is imported.
+
+The binary is resolved *through* bffless's own dependency tree, so it is always the exact
+esbuild version that got bundled — esbuild hard-fails on any API/binary version mismatch.
+Bump `bffless`, rebuild, and the matching binary follows automatically; there is no
+version to hand-maintain. Only `linux-x64` is vendored, because every consumer downloads
+`dist/` on every job and a binary per platform is not free. Building `dist/` on any other
+host prints a warning and skips the binary — build on `linux-x64` (CI does, on
+`ubuntu-latest`, and its dist-freshness check is the backstop).
+
+To run the action on a platform we don't vendor for, set `ESBUILD_BINARY_PATH` on the
+step to an esbuild binary of the matching version; an explicit value always wins.
 
 ## License
 
