@@ -1,0 +1,2 @@
+name: ts-handler
+description: Rule set whose handler is authored in TypeScript (.fn.ts) — regression fixture for issue #2.

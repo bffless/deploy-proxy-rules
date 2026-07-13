@@ -14,6 +14,7 @@
  */
 import * as core from "@actions/core";
 import path from "node:path";
+import { configureEsbuildBinary, esbuildPlatformHint } from "./esbuild-binary";
 import type { ActionInputs } from "./types";
 
 // `bffless/lib` is ESM (`"type": "module"`) while this file compiles as CommonJS (no
@@ -44,9 +45,17 @@ export interface RunDeps {
 let libPromise: Promise<Lib> | undefined;
 
 /** Load `bffless/lib` once per process and memoize the promise — every caller in this
- *  module scope awaits the same dynamic import. */
+ *  module scope awaits the same dynamic import.
+ *
+ *  `configureEsbuildBinary()` has to run *before* that import, not merely before the first
+ *  `.fn.ts` compile: importing `bffless/lib` pulls in esbuild, whose module body reads
+ *  `process.env.ESBUILD_BINARY_PATH` once and caches it. Setting it afterwards is too late,
+ *  and the failure would look like a `.fn.ts`-only bug. */
 function loadLib(): Promise<Lib> {
-  if (!libPromise) libPromise = import("bffless/lib");
+  if (!libPromise) {
+    configureEsbuildBinary();
+    libPromise = import("bffless/lib");
+  }
   return libPromise;
 }
 
@@ -68,8 +77,12 @@ export async function runSets(
 
     const { errors, warnings } = await lib.validateRuleSet(dir);
     if (errors.length > 0) {
+      // A failed `.fn.ts` compile arrives here as a validation *issue*, not a thrown error,
+      // so esbuild's raw "cannot be bundled" panic would otherwise reach the user verbatim.
+      const formatted = errors.map(formatIssue).join("\n");
+      const hint = esbuildPlatformHint(formatted);
       throw new Error(
-        `${dir}: rule set failed validation:\n${errors.map(formatIssue).join("\n")}`,
+        `${dir}: rule set failed validation:\n${formatted}${hint ? `\n\n${hint}` : ""}`,
       );
     }
     for (const warning of warnings) {

@@ -1,0 +1,2 @@
+# The vendored esbuild executable (see scripts/vendor-esbuild.mjs) — never diff or eol-munge it.
+dist/vendor/esbuild binary
