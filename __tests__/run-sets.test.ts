@@ -186,6 +186,21 @@ describe("runSets", () => {
     );
   });
 
+  it("an auth failure is explained in this action's terms — inputs, not CLI flags", async () => {
+    const { fetchImpl } = stubFetch({
+      ...PROJECTS_ROUTE,
+      [`PUT ${syncUrl()}`]: { status: 401, body: { message: "Unauthorized" } },
+    });
+
+    // The lib's default wording would say "pass --api-key or set BFFLESS_API_KEY" — neither
+    // exists for someone whose only knob is a workflow input, so runSets overrides it.
+    const err = await runSets(baseInputs(), { fetchImpl }).catch(
+      (e: unknown) => e as Error,
+    );
+    expect(err.message).toContain("`api-key` input");
+    expect(err.message).not.toContain("--api-key");
+  });
+
   it("missingSecrets alone does not throw, but emits one core.warning", async () => {
     const { fetchImpl } = stubFetch({
       ...PROJECTS_ROUTE,
