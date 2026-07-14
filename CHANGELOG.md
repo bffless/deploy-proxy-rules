@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.1.0...v1.2.0) (2026-07-14)
+
+
+### Features
+
+* one compile per set, and push errors in this action's terms ([c5c2c4c](https://github.com/bffless/deploy-proxy-rules/commit/c5c2c4cbe2e2277f87f6dc949eb44e86b2c66b7c))
+* one compile per set, and push errors in this action's terms ([c9e806a](https://github.com/bffless/deploy-proxy-rules/commit/c9e806acf2a27109cadf06d0446459e991431736))
+
 ## [1.1.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.0.0...v1.1.0) (2026-07-13)
 
 
