@@ -42,6 +42,18 @@ export interface RunDeps {
   fetchImpl?: typeof fetch;
 }
 
+/** The lib's config/auth errors default to CLI wording ("pass --api-key", "add apiUrl to
+ *  .bffless/config.json"). Nobody running this action has a flag or a committed config to
+ *  reach for — they have workflow *inputs* — so we re-word the fix-it half in their terms.
+ *  (`Partial<Remediation>`: fields we don't override keep the lib's default.) */
+const REMEDIATION = {
+  apiUrl: "set the `api-url` input on this action",
+  apiKey: "set the `api-key` input on this action (usually from a repository secret)",
+  project:
+    "set the `project` input on this action, or commit a `project` to .bffless/config.json",
+  auth: "The `api-key` input is sent as the X-API-Key header — check that the secret behind it is a live key with access to this project.",
+};
+
 let libPromise: Promise<Lib> | undefined;
 
 /** Load `bffless/lib` once per process and memoize the promise — every caller in this
@@ -89,18 +101,6 @@ export async function runSets(
       core.warning(`${dir}: ${formatIssue(warning)}`);
     }
 
-    // Ground `SetResult.name` in the lib's own compiler rather than re-parsing YAML or
-    // scraping `PushOutcome.report`'s text: `buildRuleSet` is the exported parser
-    // (`bffless/lib`) that `runPushOne` itself calls internally to derive the exact same
-    // name, so calling it here and applying the identical nameSuffix rule
-    // (`${name}-${nameSuffix}` — see `src/commands/push.ts` in the CLI) is guaranteed to
-    // match what actually got synced, since a validated set is guaranteed buildable
-    // (`validateRuleSet` already runs `buildRuleSet` as its step-2 authority).
-    const built = await lib.buildRuleSet(dir);
-    const name = inputs.nameSuffix
-      ? `${built.export.ruleSet.name}-${inputs.nameSuffix}`
-      : built.export.ruleSet.name;
-
     const outcome = await lib.runPushOne(
       dir,
       {
@@ -113,7 +113,7 @@ export async function runSets(
         project: inputs.project,
       },
       inputs.workingDirectory,
-      { fetchImpl: deps?.fetchImpl },
+      { fetchImpl: deps?.fetchImpl, remediation: REMEDIATION },
     );
 
     if (!outcome.ok || !outcome.response) {
@@ -121,6 +121,12 @@ export async function runSets(
         outcome.error ?? `${dir}: push failed with no error detail`,
       );
     }
+
+    // `outcome.name` is the name the lib actually synced under — the nameSuffix rule already
+    // applied. Taking it from the outcome (rather than re-compiling the set to re-derive it)
+    // is both a build cheaper per set and immune to drifting from the lib's naming rule.
+    // It is only ever absent when the compile failed, which `!outcome.ok` above has ruled out.
+    const name = outcome.name ?? `${dir} (unnamed)`;
 
     if (outcome.response.missingSecrets.length > 0) {
       core.warning(
