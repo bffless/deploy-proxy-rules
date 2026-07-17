@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.1](https://github.com/bffless/deploy-proxy-rules/compare/v1.2.0...v1.2.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* bundle bffless 0.2.7 so pull-authored sets can sync ([fdacfc6](https://github.com/bffless/deploy-proxy-rules/commit/fdacfc688b971fea1c1fb5c0b63bd564254b69f0))
+* bundle bffless 0.2.7 so pull-authored sets can sync ([9549a9f](https://github.com/bffless/deploy-proxy-rules/commit/9549a9f7745c3cf0609651f75d24b263680191d0))
+
 ## [1.2.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.1.0...v1.2.0) (2026-07-14)
 
 
