@@ -1,6 +1,6 @@
 "use strict";
-exports.id = 139;
-exports.ids = [139];
+exports.id = 743;
+exports.ids = [743];
 exports.modules = {
 
 /***/ 5145:
@@ -11091,7 +11091,7 @@ exports.visitAsync = visitAsync;
 
 /***/ }),
 
-/***/ 9139:
+/***/ 8124:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 // ESM COMPAT FLAG
@@ -11104,6 +11104,8 @@ __webpack_require__.d(__webpack_exports__, {
   CLI_REMEDIATION: () => (/* reexport */ CLI_REMEDIATION),
   SCHEMA_FIELD_TYPES: () => (/* reexport */ SCHEMA_FIELD_TYPES),
   applyNameSuffix: () => (/* reexport */ applyNameSuffix),
+  applyPathPrefix: () => (/* reexport */ applyPathPrefix),
+  assertPathPrefix: () => (/* reexport */ assertPathPrefix),
   buildOne: () => (/* reexport */ buildOne),
   buildRuleSet: () => (/* reexport */ buildRuleSet),
   bundleHandler: () => (/* reexport */ bundleHandler),
@@ -15341,7 +15343,7 @@ const coerce = {
 
 const NEVER = (/* unused pure expression or super */ null && (INVALID));
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/manifest.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/manifest.js
 
 
 
@@ -15486,6 +15488,9 @@ const SchemaFieldSchema = objectType({
 const SchemaManifestSchema = objectType({
     id: stringType().uuid().optional(),
     name: stringType(),
+    // Declares what the schema is FOR. Adopted by `rules push` onto a live
+    // schema that has none; a genuine conflict warns and the live value wins.
+    kind: enumType(['upload', 'chat', 'state']).optional(),
     fields: arrayType(SchemaFieldSchema),
 })
     .strict();
@@ -15556,7 +15561,7 @@ function parseYamlFile(filePath, schema) {
     return result.data;
 }
 //# sourceMappingURL=manifest.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/routes.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/routes.js
 /**
  * Bidirectional mapping between proxy-rule pathPatterns (e.g. `/api/auth/*`) and authoring-layout
  * filesystem segments (e.g. `['api', 'auth', '[...path]']`), plus deterministic specificity
@@ -15704,8 +15709,31 @@ function deriveOrders(rules) {
     sorted.forEach((rule, position) => map.set(rule, position));
     return map;
 }
+const PATH_PREFIX_RE = /^\/[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/;
+/** `--path-prefix`: a literal, absolute, `.`/`..`/`*`-free path with no trailing slash. */
+function assertPathPrefix(prefix) {
+    const hasDotSegment = prefix.split('/').some((seg) => seg === '.' || seg === '..');
+    if (!PATH_PREFIX_RE.test(prefix) || hasDotSegment) {
+        throw new Error(`--path-prefix must start with "/", contain only literal segments and end without "/" (got ${JSON.stringify(prefix)})`);
+    }
+}
+/**
+ * Prepend `prefix` to a *derived* pattern (`/echo` → `/api/hello/echo`). Explicit `pathPattern:`
+ * manifests are never passed through here — the escape hatch means "exactly this pattern", which
+ * is how a publish-time forwarder (`/w/<alias>/*`) rides inside a prefixed set (spec 06).
+ *
+ * A root rule derives to `/` (e.g. `rules/get.rule.yaml`); prepending naively would yield a
+ * trailing-slash pattern (`/api/hello/`) that CE's exact-string matcher never matches for
+ * `GET /api/hello`, so the root case returns the bare prefix instead.
+ */
+function applyPathPrefix(pattern, prefix) {
+    if (!prefix)
+        return pattern;
+    assertPathPrefix(prefix);
+    return pattern === '/' ? prefix : `${prefix}${pattern}`;
+}
 //# sourceMappingURL=routes.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/defaults.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/defaults.js
 const PIPELINE_TARGET_URL_DEFAULT = 'http://internal/pipeline';
 /** Boilerplate defaults injected by the compiler and elided by the decompiler. */
 const RULE_DEFAULTS = {
@@ -15756,11 +15784,11 @@ function elideRuleDefaults(rule) {
     return out;
 }
 //# sourceMappingURL=defaults.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/types.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/types.js
 const RULE_KEY_ORDER = ['pathPattern', 'method', 'methods', 'targetUrl', 'stripPrefix', 'order', 'timeout', 'preserveHost', 'forwardCookies', 'headerConfig', 'authTransform', 'internalRewrite', 'proxyType', 'emailHandlerConfig', 'pipelineConfig', 'isEnabled', 'debugEnabled', 'description'];
 const ENVELOPE_KEY_ORDER = ['version', 'exportedAt', 'kind', 'ruleSet', 'rules', 'schemas'];
 //# sourceMappingURL=types.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/canonical.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/canonical.js
 
 
 const STEP_KEY_ORDER = ['id', 'name', 'handlerType', 'config', 'isEnabled'];
@@ -15983,7 +16011,7 @@ function exportsEquivalent(a, b) {
     return { equal: diffs.length === 0, diffs };
 }
 //# sourceMappingURL=canonical.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/format/schema-refs.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/format/schema-refs.js
 /**
  * Keys inside a rule's pipeline config (step/postStep `config` objects, canonical or
  * authoring form) that hold a reference to a `pipeline_schemas` row id. Mirror of
@@ -16037,7 +16065,7 @@ function walkSchemaRefs(value, visit) {
 var main = __webpack_require__(5145);
 // EXTERNAL MODULE: external "node:vm"
 var external_node_vm_ = __webpack_require__(714);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/lint/patterns.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/lint/patterns.js
 
 /**
  * Prohibited patterns for pipeline `function_handler` code, transcribed 1:1
@@ -16124,7 +16152,7 @@ function validateHandlerSource(code) {
     return findings;
 }
 //# sourceMappingURL=patterns.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/compile/bundle.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/compile/bundle.js
 /**
  * `.fn.ts` handler bundling core. Compiles a single TypeScript handler entry file (plus any
  * relative imports it pulls in, confined to the rule set directory) into a self-contained
@@ -16297,7 +16325,7 @@ async function bundleHandler(entryFile, setDir, opts = {}) {
     return { code, warnings };
 }
 //# sourceMappingURL=bundle.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/compile/build.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/compile/build.js
 /**
  * Compiler: authoring layout (`ruleset.yaml` + `rules/` + `schemas/`) → a canonical
  * `RuleSetExport` (the wire format consumed by the DB import). See task-6 brief for the
@@ -16497,6 +16525,12 @@ function collectSkillRefs(steps, into) {
     }
 }
 async function buildRuleSet(setDir, opts) {
+    // Validate eagerly: applyPathPrefix only runs for rules with a *derived* pathPattern, so a
+    // rule set whose every rule has an explicit `pathPattern:` would otherwise accept a garbage
+    // --path-prefix silently (it's never applied). The inner applyPathPrefix call stays too —
+    // this is belt-and-suspenders, not a replacement.
+    if (opts?.pathPrefix !== undefined)
+        assertPathPrefix(opts.pathPrefix);
     const rulesetPath = external_node_path_.join(setDir, 'ruleset.yaml');
     if (!(0,external_node_fs_.existsSync)(rulesetPath))
         throw new Error(`not a rule set (no ruleset.yaml): ${setDir}`);
@@ -16517,6 +16551,8 @@ async function buildRuleSet(setDir, opts) {
         const entry = {
             id: manifest.id ?? uuidv5(name, SCHEMA_NAMESPACE),
             name: manifest.name,
+            // Key order matches the server's export builder — see ExportedSchema.
+            ...(manifest.kind ? { kind: manifest.kind } : {}),
             fields: manifest.fields,
         };
         schemasByName.set(name, entry);
@@ -16550,7 +16586,16 @@ async function buildRuleSet(setDir, opts) {
             }
             method = stemMethod;
         }
-        const pathPattern = manifest.pathPattern ?? relPathToPattern(d.dirSegments);
+        // Order/specificity is derived from this same, final (post-prefix) pathPattern — CE's
+        // request matcher selects the first match by ascending `order` over the *exported*
+        // patterns, so ranking must reflect what CE actually sees. A uniform --path-prefix adds
+        // the same literal segments to every derived pattern's literalCount and shifts every
+        // wildcard index by the same amount, so it provably cannot change the *relative* order
+        // among derived rules — nothing authored is perturbed. What it CAN legitimately change is
+        // a derived rule's rank against an explicit, never-prefixed `pathPattern:` escape hatch
+        // (e.g. a catch-all `/api/hello/*` should rank after the specific prefixed routes it
+        // shares a prefix with) — see docs/reference.md's "Path prefix" section.
+        const pathPattern = manifest.pathPattern ?? applyPathPrefix(relPathToPattern(d.dirSegments), opts?.pathPrefix);
         const pipelineDefaultName = defaultPipelineName(d.dirSegments, d.methodStem);
         // headerConfig.add must carry empty-string placeholders only — never real secret values.
         if (manifest.headerConfig?.add) {
@@ -16632,13 +16677,15 @@ async function buildRuleSet(setDir, opts) {
             manifestPath: d.manifestPath,
         });
     }
-    // Duplicate (pathPattern, method) — mirrors the DB unique key.
+    // Duplicate (pathPattern, method) — mirrors the DB unique key. Keyed on the final exported
+    // pathPattern (partial.pathPattern) so a --path-prefix collision (an explicit `pathPattern:`
+    // rule landing on the same string as a prefixed derived one) is still caught.
     const seen = new Map();
     for (const c of compiled) {
-        const key = `${c.descriptor.pathPattern} ${c.descriptor.method ?? ''}`;
+        const key = `${c.partial.pathPattern} ${c.descriptor.method ?? ''}`;
         const prior = seen.get(key);
         if (prior) {
-            throw new Error(`duplicate rule (${c.descriptor.pathPattern} ${c.descriptor.method ?? 'ANY'}) defined in both ${prior} and ${c.manifestPath}`);
+            throw new Error(`duplicate rule (${c.partial.pathPattern} ${c.descriptor.method ?? 'ANY'}) defined in both ${prior} and ${c.manifestPath}`);
         }
         seen.set(key, c.manifestPath);
     }
@@ -16682,7 +16729,7 @@ async function buildRuleSet(setDir, opts) {
     };
 }
 //# sourceMappingURL=build.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/build.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/build.js
 /**
  * `rules build` orchestration: runs `buildRuleSet` over one rule-set directory, writes the
  * canonical export JSON to disk, and reports a one-line summary. Command wiring (commander,
@@ -16703,7 +16750,7 @@ async function buildRuleSet(setDir, opts) {
 async function buildOne(setDir, opts) {
     let result;
     try {
-        result = await buildRuleSet(setDir);
+        result = await buildRuleSet(setDir, { pathPrefix: opts?.pathPrefix });
     }
     catch (err) {
         return { ok: false, summary: err instanceof Error ? err.message : String(err) };
@@ -16722,7 +16769,7 @@ async function buildOne(setDir, opts) {
     return { ok: true, outFile, summary, warnings: result.warnings };
 }
 //# sourceMappingURL=build.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/validate.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/validate.js
 /**
  * `rules validate` orchestration: composes the manifest zod schemas, `buildRuleSet`, the
  * `.fn.js` sandbox lint, and the §3.5 skills cross-ref into one pass over a rule-set
@@ -17072,7 +17119,7 @@ async function validateRuleSet(setDir) {
 var external_node_assert_ = __webpack_require__(4589);
 // EXTERNAL MODULE: external "node:fs/promises"
 var promises_ = __webpack_require__(1455);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/harness/utils.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/harness/utils.js
 
 /**
  * Default signing base for the harness. The runtime derives its key from
@@ -17127,7 +17174,7 @@ function createUtils(signingSecret) {
     };
 }
 //# sourceMappingURL=utils.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/harness/run-handler.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/harness/run-handler.js
 
 
 
@@ -17317,7 +17364,7 @@ async function runHandlerFile(file, data = {}, opts = {}) {
     return runHandler(code, data, opts);
 }
 //# sourceMappingURL=run-handler.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/test.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/test.js
 /**
  * `rules test` orchestration: declarative handler fixtures (`*.fn.test.yaml`) run through
  * the Task 10 `node:vm` harness. Command wiring (commander, process.exit) is Task 13 —
@@ -17439,7 +17486,7 @@ async function runFnTests(setDir) {
     return { passed, failed };
 }
 //# sourceMappingURL=test.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/config.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/config.js
 /**
  * `.bffless/config.json` discovery + rule-set directory resolution.
  *
@@ -17595,32 +17642,122 @@ function resolveRuleSetDirs(cwd, args) {
     return [...dirs].sort();
 }
 //# sourceMappingURL=config.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/api/remediation.js
+// EXTERNAL MODULE: external "node:os"
+var external_node_os_ = __webpack_require__(8161);
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/api/credentials.js
+/**
+ * Credential store for `bffless login` — `$XDG_CONFIG_HOME/bffless/credentials.json`
+ * (default `~/.config/bffless/credentials.json`), mode 0600, written atomically.
+ *
+ * Keys are stored OUTSIDE any repo, keyed by normalized API URL, so the client.ts
+ * invariant holds: API keys are never read from a repo-committed file. Resolution
+ * precedence stays flag > env > (this store) — see createClient.
+ *
+ * A present-but-broken file is a hard error naming the path (same stance as
+ * config.ts): silently treating it as "no credentials" would send the user down a
+ * confusing "why am I logged out" path instead of "your file is corrupt".
+ */
+
+
+
+
+const CredentialsFileSchema = objectType({
+    version: literalType(1),
+    credentials: recordType(objectType({ apiKey: stringType().min(1), createdAt: stringType() }).strict()),
+})
+    .strict();
+/** Default store location, honouring `$XDG_CONFIG_HOME`. */
+function credentialsPath(env = process.env) {
+    const base = env.XDG_CONFIG_HOME && env.XDG_CONFIG_HOME.length > 0
+        ? env.XDG_CONFIG_HOME
+        : external_node_path_.join(external_node_os_.homedir(), '.config');
+    return external_node_path_.join(base, 'bffless', 'credentials.json');
+}
+/** Canonical store key for an instance URL: URL-parsed (lowercased host), trailing slashes stripped. */
+function normalizeApiUrl(raw) {
+    let url;
+    try {
+        url = new URL(raw);
+    }
+    catch {
+        throw new Error(`invalid API URL: "${raw}" — expected e.g. https://admin.example.com`);
+    }
+    const pathname = url.pathname.replace(/\/+$/, '');
+    return `${url.protocol}//${url.host}${pathname}`;
+}
+/** Parse the store. `null` when the file does not exist; throws (naming the path) when broken. */
+function readCredentialsFile(file) {
+    if (!(0,external_node_fs_.existsSync)(file))
+        return null;
+    const raw = (0,external_node_fs_.readFileSync)(file, 'utf8');
+    let data;
+    try {
+        data = JSON.parse(raw);
+    }
+    catch (err) {
+        throw new Error(`${file}: invalid JSON — ${err.message}`);
+    }
+    const result = CredentialsFileSchema.safeParse(data);
+    if (!result.success) {
+        throw new Error(`${file}: does not match the credentials schema — fix or delete the file and run \`bffless login\` again`);
+    }
+    return result.data;
+}
+function getStoredKey(apiUrl, file = credentialsPath()) {
+    return readCredentialsFile(file)?.credentials[normalizeApiUrl(apiUrl)]?.apiKey;
+}
+function storeKey(apiUrl, apiKey, file = credentialsPath(), now = new Date()) {
+    const store = readCredentialsFile(file) ?? { version: 1, credentials: {} };
+    store.credentials[normalizeApiUrl(apiUrl)] = { apiKey, createdAt: now.toISOString() };
+    writeCredentialsFile(file, store);
+}
+/** Remove an instance's entry. Returns whether anything was removed. */
+function removeKey(apiUrl, file = credentialsPath()) {
+    const store = readCredentialsFile(file);
+    const key = normalizeApiUrl(apiUrl);
+    if (!store || !(key in store.credentials))
+        return false;
+    delete store.credentials[key];
+    writeCredentialsFile(file, store);
+    return true;
+}
+/** Atomic write (temp + rename), file 0600, parent dir 0700. */
+function writeCredentialsFile(file, data) {
+    mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+    const tmp = `${file}.${process.pid}.tmp`;
+    writeFileSync(tmp, JSON.stringify(data, null, 2) + '\n', { mode: 0o600 });
+    renameSync(tmp, file);
+    chmodSync(file, 0o600);
+}
+//# sourceMappingURL=credentials.js.map
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/api/remediation.js
 /** Default wording, phrased for someone running the `bffless` CLI. */
 const CLI_REMEDIATION = {
     apiUrl: 'pass --api-url, set BFFLESS_API_URL, or add "apiUrl" to .bffless/config.json',
-    apiKey: 'pass --api-key or set BFFLESS_API_KEY (API keys are never read from .bffless/config.json, ' +
-        'which is committed to the repo)',
+    apiKey: 'pass --api-key, set BFFLESS_API_KEY, or run `bffless login` (API keys are never read ' +
+        'from .bffless/config.json, which is committed to the repo)',
     project: 'pass --project <uuid|owner/name|name> or add "project" to .bffless/config.json',
-    auth: 'The API key is sent as the X-API-Key header — pass --api-key or set BFFLESS_API_KEY to a ' +
-        'key with access to this project.',
+    auth: 'The API key is sent as the X-API-Key header — pass --api-key, set BFFLESS_API_KEY, or ' +
+        'run `bffless login` with a key that has access to this project.',
 };
 /** Fill any unspecified field from {@link CLI_REMEDIATION}. */
 function resolveRemediation(overrides) {
     return overrides ? { ...CLI_REMEDIATION, ...overrides } : CLI_REMEDIATION;
 }
 //# sourceMappingURL=remediation.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/api/client.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/api/client.js
 /**
  * Minimal HTTP client for the BFFless backend API (Phase 1 live `pull`/`push`/`diff`).
  *
  * Base-URL resolution: `--api-url` flag > `BFFLESS_API_URL` env > `apiUrl` in the nearest
  * `.bffless/config.json`.
  *
- * API-key resolution: `--api-key` flag > `BFFLESS_API_KEY` env — and NOTHING else.
- * The key is deliberately never read from `.bffless/config.json`: that file is meant to be
- * committed to the repo (it carries `apiUrl`/`project`/`ruleSets` for the whole team), so
- * supporting a key there would invite committing credentials. Keys stay in flags/env only.
+ * API-key resolution: `--api-key` flag > `BFFLESS_API_KEY` env > the `bffless login`
+ * credential store (~/.config/bffless/credentials.json, keyed by normalized apiUrl) —
+ * and NOTHING else. The key is deliberately never read from `.bffless/config.json`:
+ * that file is meant to be committed to the repo (it carries `apiUrl`/`project`/
+ * `ruleSets` for the whole team), so supporting a key there would invite committing
+ * credentials. Keys stay in flags/env/the out-of-repo store only.
  *
  * Auth is the backend's `ApiKeyGuard`, which reads the `X-API-Key` request header.
  *
@@ -17631,6 +17768,7 @@ function resolveRemediation(overrides) {
  * `fetch` is injectable for tests. No retries — a CI drift check or deploy push should fail
  * fast and loudly rather than mask a flaky endpoint.
  */
+
 
 
 /** Error thrown for any failed request; `status` is 0 for network-level failures. */
@@ -17748,15 +17886,17 @@ function createClient(flags, cwd, deps) {
     if (!apiUrl) {
         throw new Error(`no API URL configured — ${remediation.apiUrl}`);
     }
-    // Key precedence is flag > env ONLY — never config.json (a committed file; see module doc).
-    const apiKey = flags.apiKey ?? env.BFFLESS_API_KEY;
+    // Key precedence is flag > env > credential store — never config.json (a committed
+    // file; see module doc). The store (written by `bffless login`) lives in ~/.config,
+    // outside any repo, and is keyed by normalized apiUrl.
+    const apiKey = flags.apiKey ?? env.BFFLESS_API_KEY ?? getStoredKey(apiUrl, deps?.credentialsFile);
     if (!apiKey) {
         throw new Error(`no API key configured — ${remediation.apiKey}`);
     }
     return new ApiClient({ apiUrl, apiKey, fetchImpl: deps?.fetchImpl, remediation: deps?.remediation });
 }
 //# sourceMappingURL=client.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/api/resolve.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/api/resolve.js
 /**
  * Name → id resolution against the backend's UUID-addressed API.
  *
@@ -17871,7 +18011,7 @@ function requireProject(flagProject, configProject, remediation) {
 //# sourceMappingURL=resolve.js.map
 // EXTERNAL MODULE: external "node:child_process"
 var external_node_child_process_ = __webpack_require__(1421);
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/api/git-source.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/api/git-source.js
 /**
  * Best-effort `source` provenance for `rules push` — stamped by the server onto the rule
  * set's `source` column so the UI can show "managed from git".
@@ -17943,7 +18083,7 @@ function collectSourceMetadata(setDir, deps) {
     return Object.keys(source).length > 0 ? source : undefined;
 }
 //# sourceMappingURL=git-source.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/push.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/push.js
 /**
  * `rules push` orchestration: compile a rule-set directory in-memory (same compiler as
  * `rules build`, nothing written to `dist/`), then `PUT /api/proxy-rule-sets/project/
@@ -17997,6 +18137,12 @@ function formatSyncReport(setName, res) {
         lines.push(`  MISSING SECRETS (${res.missingSecrets.length}) — set these in the project's secrets: ` +
             res.missingSecrets.join(', '));
     }
+    // Adoption is an action, not a warning: the sync filled in a kind the live
+    // schema was missing, so say so rather than leaving it to the schema list.
+    const adopted = res.schemaResolutions.filter((r) => r.kindAdopted);
+    if (adopted.length > 0) {
+        lines.push(`  declared kind adopted by: ${adopted.map((r) => r.name).join(', ')}`);
+    }
     for (const w of res.warnings)
         lines.push(`  warning: ${w}`);
     return lines.join('\n');
@@ -18004,7 +18150,7 @@ function formatSyncReport(setName, res) {
 async function runPushOne(setDir, opts, cwd, deps) {
     let built;
     try {
-        built = await buildRuleSet(setDir);
+        built = await buildRuleSet(setDir, { pathPrefix: opts.pathPrefix });
     }
     catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : String(err) };
@@ -18039,7 +18185,7 @@ async function runPushOne(setDir, opts, cwd, deps) {
     }
 }
 //# sourceMappingURL=push.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/diff.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/diff.js
 /**
  * `rules diff` orchestration — the CI drift-check contract:
  *
@@ -18105,7 +18251,7 @@ function alignLocalSchemaIdsToLive(local, live) {
 async function runDiffOne(setDir, opts, cwd, deps) {
     let local;
     try {
-        local = (await buildRuleSet(setDir)).export;
+        local = (await buildRuleSet(setDir, { pathPrefix: opts.pathPrefix })).export;
     }
     catch (err) {
         return { status: 'error', message: err instanceof Error ? err.message : String(err) };
@@ -18140,7 +18286,7 @@ async function runDiffOne(setDir, opts, cwd, deps) {
     return { status: 'drift', setName, message: `${setName}: drift detected (local != live)`, diffs };
 }
 //# sourceMappingURL=diff.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/revisions.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/revisions.js
 /**
  * `rules revisions` — list captured revisions for a rule set (GET
  * /api/proxy-rule-sets/:id/revisions), newest first, exactly as the server sends them.
@@ -18201,7 +18347,7 @@ async function runRevisionsList(setName, opts, cwd, deps) {
     }
 }
 //# sourceMappingURL=revisions.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/rollback.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/rollback.js
 /**
  * `rules rollback` — replay a captured revision through the sync endpoint (POST
  * /api/proxy-rule-sets/:id/rollback/:revisionId). The response IS a `SyncResponse` (rollback
@@ -19988,7 +20134,7 @@ function watch(paths, options = {}) {
 }
 /* harmony default export */ const chokidar_esm = ({ watch, FSWatcher });
 
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/dev.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/dev.js
 /**
  * `rules dev` watch mode: a local-first dev loop over one or more rule-set directories.
  *
@@ -20189,7 +20335,7 @@ async function runDev(dirs, opts, cwd, deps) {
     };
 }
 //# sourceMappingURL=dev.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/commands/init.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/commands/init.js
 /**
  * `rules init` — scaffold authoring files in a rule-set directory.
  *
@@ -20205,6 +20351,8 @@ async function runDev(dirs, opts, cwd, deps) {
 
 
 
+/** Declared schema purposes the server accepts (mirrors the backend's `SchemaKind`). */
+const SCHEMA_KINDS = ['upload', 'chat', 'state'];
 /** Field types accepted by pipeline schemas (mirrors the backend's `SchemaFieldType`). */
 const SCHEMA_FIELD_TYPES = ['string', 'number', 'boolean', 'email', 'text', 'datetime', 'json'];
 /** Schema names become filenames (`schemas/<name>.schema.yaml`), so keep them path-safe. */
@@ -20228,7 +20376,7 @@ function parseFieldSpec(spec) {
     }
     return { name, type, required: flag === 'required' };
 }
-function schemaYaml(name, fields) {
+function schemaYaml(name, fields, kind) {
     const header = [
         `# Pipeline schema "${name}" — reference it from rules as \`$schema:${name}\`.`,
         '#',
@@ -20239,8 +20387,13 @@ function schemaYaml(name, fields) {
         '# first push; edit live fields in the dashboard.',
         '#',
         `# Field types: ${SCHEMA_FIELD_TYPES.join(' | ')}`,
+        '#',
+        `# kind: ${SCHEMA_KINDS.join(' | ')} — optional; declares what the schema is FOR so the`,
+        '# dashboard stops guessing from field names. Adopted onto a live schema that has none;',
+        '# a conflict warns and the live value wins.',
     ].join('\n');
-    const body = (0,dist/* stringify */.As)({ name, fields }, { blockQuote: 'literal', lineWidth: 0 });
+    // Key order matches the compiler's export entry (name, kind, fields).
+    const body = (0,dist/* stringify */.As)(kind ? { name, kind, fields } : { name, fields }, { blockQuote: 'literal', lineWidth: 0 });
     const example = fields.length > 0
         ? ''
         : [
@@ -20296,16 +20449,19 @@ function runInit(dir, opts, cwd) {
     catch (err) {
         return { ok: false, error: err instanceof Error ? err.message : String(err) };
     }
+    if (opts.kind !== undefined && !SCHEMA_KINDS.includes(opts.kind)) {
+        return { ok: false, error: `invalid --kind "${opts.kind}" — one of ${SCHEMA_KINDS.join(', ')}` };
+    }
     const outFile = external_node_path_.join(setDir, 'schemas', `${name}.schema.yaml`);
     if ((0,external_node_fs_.existsSync)(outFile) && !opts.force) {
         return { ok: false, error: `${external_node_path_.relative(cwd, outFile)} already exists (use --force to overwrite)` };
     }
     (0,external_node_fs_.mkdirSync)(external_node_path_.dirname(outFile), { recursive: true });
-    (0,external_node_fs_.writeFileSync)(outFile, schemaYaml(name, fields), 'utf8');
+    (0,external_node_fs_.writeFileSync)(outFile, schemaYaml(name, fields, opts.kind), 'utf8');
     return { ok: true, outFile, hint: `reference it from a rule pipeline as $schema:${name}` };
 }
 //# sourceMappingURL=init.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/compile/decompile.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/compile/decompile.js
 /**
  * Decompiler: a canonical `RuleSetExport` → the authoring layout (`ruleset.yaml` + `rules/` +
  * `schemas/`). Exact inverse of the compiler (src/compile/build.ts) — its output must recompile
@@ -20428,7 +20584,7 @@ function decompileExport(exp) {
     for (const s of canon.schemas ?? [])
         idToName.set(s.id, s.name);
     for (const s of canon.schemas ?? []) {
-        files.set(`schemas/${s.name}.schema.yaml`, toYaml({ id: s.id, name: s.name, fields: s.fields }));
+        files.set(`schemas/${s.name}.schema.yaml`, toYaml({ id: s.id, name: s.name, ...(s.kind ? { kind: s.kind } : {}), fields: s.fields }));
     }
     // Derived orders (keyed by the canonical rule objects) for `order:` elision.
     const orderMap = deriveOrders(canon.rules);
@@ -20518,13 +20674,14 @@ async function writeDecompiled(res, outDir, opts) {
     }
 }
 //# sourceMappingURL=decompile.js.map
-;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.2.7/node_modules/bffless/dist/lib.js
+;// CONCATENATED MODULE: ./node_modules/.pnpm/bffless@0.3.3/node_modules/bffless/dist/lib.js
 /**
  * Library entry point (`bffless/lib`) — a pure re-export barrel with no side effects.
  * Unlike `./` (`dist/index.js`), which runs `program.parseAsync()` at module top level,
  * importing this module never executes commander or any CLI command. Safe to ncc-bundle
  * into a GitHub Action.
  */
+
 
 
 

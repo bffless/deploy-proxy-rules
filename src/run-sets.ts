@@ -108,6 +108,7 @@ export async function runSets(
         prune: inputs.prune,
         strictSchemas: inputs.strictSchemas,
         nameSuffix: inputs.nameSuffix,
+        pathPrefix: inputs.pathPrefix,
         apiUrl: inputs.apiUrl,
         apiKey: inputs.apiKey,
         project: inputs.project,

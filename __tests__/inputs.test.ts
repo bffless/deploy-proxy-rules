@@ -37,6 +37,7 @@ describe('getInputs', () => {
     expect(result.prune).toBe(false);
     expect(result.dryRun).toBe(false);
     expect(result.nameSuffix).toBeUndefined();
+    expect(result.pathPrefix).toBeUndefined();
     expect(result.strictSchemas).toBe(false);
     expect(result.workingDirectory).toBe('.');
     expect(result.summary).toBe(true);
@@ -191,13 +192,14 @@ describe('getInputs', () => {
     expect(getInputs().prComment).toBe(true);
   });
 
-  it('parses optional string inputs (project, name-suffix, summary-title, comment-header, working-directory)', () => {
+  it('parses optional string inputs (project, name-suffix, path-prefix, summary-title, comment-header, working-directory)', () => {
     mockInputs({
       path: 'rule-sets/api',
       'api-url': 'https://assets.example.com',
       'api-key': 'key',
       project: 'my-project',
       'name-suffix': 'staging',
+      'path-prefix': '/api/hello',
       'summary-title': 'Custom Title',
       'comment-header': 'Custom Header',
       'working-directory': 'apps/api',
@@ -206,6 +208,7 @@ describe('getInputs', () => {
     const result = getInputs();
     expect(result.project).toBe('my-project');
     expect(result.nameSuffix).toBe('staging');
+    expect(result.pathPrefix).toBe('/api/hello');
     expect(result.summaryTitle).toBe('Custom Title');
     expect(result.commentHeader).toBe('Custom Header');
     expect(result.workingDirectory).toBe('apps/api');
@@ -224,6 +227,20 @@ describe('getInputs', () => {
 
     const result = getInputs();
     expect(result.nameSuffix).toBeUndefined();
+  });
+
+  // Same rule for path-prefix: '' means "no prefix", never a prefix of the empty string
+  // (which the lib would reject as an invalid --path-prefix rather than ignore).
+  it('treats an empty path-prefix input as unset (undefined), not empty string', () => {
+    mockInputs({
+      path: 'rule-sets/api',
+      'api-url': 'https://assets.example.com',
+      'api-key': 'key',
+      'path-prefix': '',
+    });
+
+    const result = getInputs();
+    expect(result.pathPrefix).toBeUndefined();
   });
 
   it('reads github-token from input when provided', () => {

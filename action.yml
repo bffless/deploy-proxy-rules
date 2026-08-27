@@ -30,6 +30,9 @@ inputs:
   name-suffix:
     description: 'Suffix appended to each rule set name on push (pushes <name>-<suffix>)'
     required: false
+  path-prefix:
+    description: 'Prepend a literal prefix to every derived pathPattern before syncing (e.g. /api/hello). Explicit pathPattern: manifests are left verbatim. Requires bffless >= 0.3.3.'
+    required: false
   strict-schemas:
     description: 'Fail on schema warnings instead of only reporting them'
     required: false

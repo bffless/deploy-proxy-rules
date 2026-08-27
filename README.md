@@ -143,6 +143,36 @@ Step summary output looks like:
 > | POST /api/items | + |
 > | GET /api/items/:id | ~ |
 
+### Workflow implementations
+
+`path-prefix` prepends a literal prefix to every `pathPattern` this action *derives* from
+the `rules/` directory layout, so one rule set can be published under a namespace it
+doesn't hard-code. A set whose `rules/echo/post.rule.yaml` normally syncs as `/echo`
+syncs as `/api/hello/echo` with:
+
+```yaml
+- uses: bffless/deploy-proxy-rules@v1
+  with:
+    path: rule-sets/hello
+    api-url: ${{ vars.BFFLESS_URL }}
+    api-key: ${{ secrets.BFFLESS_API_KEY }}
+    project: my-project
+    path-prefix: /api/hello
+```
+
+Two things to know:
+
+- **Explicit `pathPattern:` manifests are left verbatim.** The escape hatch means
+  "exactly this pattern", so a rule that pins its own `pathPattern:` is never prefixed —
+  that's how a fixed forwarder route can ride inside an otherwise prefixed set.
+- **Match it locally.** `bffless rules diff` compiles the same source, so compare against
+  a prefixed set with the same flag (`bffless rules diff <dir> --path-prefix /api/hello`)
+  or every rule reads as changed. Needs `bffless` >= 0.3.3.
+
+The prefix must start with `/`, contain only literal segments, and not end with `/` —
+`/api/hello` is valid; `api/hello`, `/api/hello/` and `/api/*` are not, and fail the run
+at compile time.
+
 ### Using outputs
 
 ```yaml
@@ -170,6 +200,7 @@ Step summary output looks like:
 | `prune`                | no       | `'false'`              | Delete rules/schemas on the server that are absent from source                            |
 | `dry-run`              | no       | `'false'`              | Compute and report the sync without pushing changes                                       |
 | `name-suffix`          | no       | --                     | Suffix appended to each rule set name on push (pushes `<name>-<suffix>`)                  |
+| `path-prefix`          | no       | --                     | Prepend a literal prefix to every *derived* `pathPattern` before syncing (e.g. `/api/hello`). Explicit `pathPattern:` manifests are left verbatim. Requires `bffless` >= 0.3.3 |
 | `strict-schemas`       | no       | `'false'`              | Fail on schema warnings instead of only reporting them                                    |
 | `working-directory`    | no       | `'.'`                  | Working directory for resolving relative paths                                            |
 | `summary`              | no       | `'true'`               | Write a GitHub Step Summary                                                               |
@@ -197,8 +228,9 @@ For each directory in `path` (in order):
    errors fail the run immediately; warnings are logged via `core.warning` and don't stop
    the sync.
 2. **Compiles** the rule set with the same compiler `bffless rules build` uses, applying
-   `name-suffix` to the set's name if provided. TypeScript handlers (`.fn.ts`) are bundled
-   to JavaScript with esbuild at this point; `.fn.js` handlers are used as-is.
+   `name-suffix` to the set's name and `path-prefix` to each derived `pathPattern` if
+   provided. TypeScript handlers (`.fn.ts`) are bundled to JavaScript with esbuild at this
+   point; `.fn.js` handlers are used as-is.
 3. **Syncs** via `PUT /api/proxy-rule-sets/project/:projectId/sync`, honoring `prune`,
    `dry-run` and `strict-schemas`.
 4. **Sets outputs** from the collected results (`rule-set-ids`, `rule-set-names`,
