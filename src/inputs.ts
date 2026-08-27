@@ -36,6 +36,9 @@ export function getInputs(): ActionInputs {
   // Empty string ('') is treated as unset, not as an empty suffix — a name-suffix
   // input of '' must not silently produce "<name>-" on push (load-bearing for E5).
   const nameSuffix = core.getInput('name-suffix') || undefined;
+  // Same '' = unset rule: an empty path-prefix must mean "no prefix", not a prefix of the
+  // empty string — the lib validates the value and would reject '' outright.
+  const pathPrefix = core.getInput('path-prefix') || undefined;
   const strictSchemas = parseBooleanDefaultFalse(core.getInput('strict-schemas'));
   const workingDirectory = core.getInput('working-directory') || '.';
 
@@ -55,6 +58,7 @@ export function getInputs(): ActionInputs {
     prune,
     dryRun,
     nameSuffix,
+    pathPrefix,
     strictSchemas,
     workingDirectory,
     summary,

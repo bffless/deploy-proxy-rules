@@ -6,6 +6,7 @@ export interface ActionInputs {
     prune: boolean;
     dryRun: boolean;
     nameSuffix?: string;
+    pathPrefix?: string;
     strictSchemas: boolean;
     workingDirectory: string;
     summary: boolean;

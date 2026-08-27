@@ -30154,6 +30154,9 @@ function getInputs() {
     // Empty string ('') is treated as unset, not as an empty suffix — a name-suffix
     // input of '' must not silently produce "<name>-" on push (load-bearing for E5).
     const nameSuffix = core.getInput('name-suffix') || undefined;
+    // Same '' = unset rule: an empty path-prefix must mean "no prefix", not a prefix of the
+    // empty string — the lib validates the value and would reject '' outright.
+    const pathPrefix = core.getInput('path-prefix') || undefined;
     const strictSchemas = parseBooleanDefaultFalse(core.getInput('strict-schemas'));
     const workingDirectory = core.getInput('working-directory') || '.';
     const summaryInput = core.getInput('summary') || 'true';
@@ -30170,6 +30173,7 @@ function getInputs() {
         prune,
         dryRun,
         nameSuffix,
+        pathPrefix,
         strictSchemas,
         workingDirectory,
         summary,
@@ -30432,7 +30436,7 @@ let libPromise;
 function loadLib() {
     if (!libPromise) {
         (0, esbuild_binary_1.configureEsbuildBinary)();
-        libPromise = __nccwpck_require__.e(/* import() */ 139).then(__nccwpck_require__.bind(__nccwpck_require__, 9139));
+        libPromise = __nccwpck_require__.e(/* import() */ 743).then(__nccwpck_require__.bind(__nccwpck_require__, 8124));
     }
     return libPromise;
 }
@@ -30461,6 +30465,7 @@ async function runSets(inputs, deps) {
             prune: inputs.prune,
             strictSchemas: inputs.strictSchemas,
             nameSuffix: inputs.nameSuffix,
+            pathPrefix: inputs.pathPrefix,
             apiUrl: inputs.apiUrl,
             apiKey: inputs.apiKey,
             project: inputs.project,
@@ -30711,6 +30716,14 @@ module.exports = require("node:fs");
 
 "use strict";
 module.exports = require("node:fs/promises");
+
+/***/ }),
+
+/***/ 8161:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("node:os");
 
 /***/ }),
 

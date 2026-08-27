@@ -75,6 +75,7 @@ function baseInputs(overrides?: Partial<ActionInputs>): ActionInputs {
     prune: false,
     dryRun: false,
     nameSuffix: undefined,
+    pathPrefix: undefined,
     strictSchemas: false,
     workingDirectory: __dirname,
     summary: true,
@@ -141,6 +142,40 @@ describe("runSets", () => {
     const syncCall = calls.find((c) => c.url === syncUrl());
     const body = JSON.parse(syncCall!.init!.body as string);
     expect(body.ruleSet.name).toBe("basic-pr-42");
+  });
+
+  // `pathPrefix` reaches `lib.runPushOne` as an option, so the proof it was forwarded is
+  // the compiled body on the wire: the fixture's derived `/api/items` comes back prefixed.
+  // (Explicit `pathPattern:` manifests are left verbatim by the lib — not exercised here,
+  // since the basic fixture derives its pattern from the rules/ directory layout.)
+  it("pathPrefix is prepended to every derived pathPattern in the synced body", async () => {
+    const { fetchImpl, calls } = stubFetch({
+      ...PROJECTS_ROUTE,
+      [`PUT ${syncUrl()}`]: { body: syncResponse() },
+    });
+
+    await runSets(baseInputs({ pathPrefix: "/api/hello" }), { fetchImpl });
+
+    const syncCall = calls.find((c) => c.url === syncUrl());
+    const body = JSON.parse(syncCall!.init!.body as string);
+    expect(body.rules).toEqual([
+      expect.objectContaining({ pathPattern: "/api/hello/api/items" }),
+    ]);
+  });
+
+  it("an unset pathPrefix leaves derived pathPatterns untouched", async () => {
+    const { fetchImpl, calls } = stubFetch({
+      ...PROJECTS_ROUTE,
+      [`PUT ${syncUrl()}`]: { body: syncResponse() },
+    });
+
+    await runSets(baseInputs({ pathPrefix: undefined }), { fetchImpl });
+
+    const syncCall = calls.find((c) => c.url === syncUrl());
+    const body = JSON.parse(syncCall!.init!.body as string);
+    expect(body.rules).toEqual([
+      expect.objectContaining({ pathPattern: "/api/items" }),
+    ]);
   });
 
   it("dryRun/prune/strictSchemas are forwarded in the sync body options", async () => {
