@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.2.1...v1.3.0) (2026-08-27)
+
+
+### Features
+
+* path-prefix input ([d8dc0f3](https://github.com/bffless/deploy-proxy-rules/commit/d8dc0f3b34f588dfe54ae870e6597f6f1a5617cc))
+* path-prefix input ([a33c663](https://github.com/bffless/deploy-proxy-rules/commit/a33c663988bd1774644da9b0bd63c57b228cfae1))
+
 ## [1.2.1](https://github.com/bffless/deploy-proxy-rules/compare/v1.2.0...v1.2.1) (2026-07-17)
 
 
