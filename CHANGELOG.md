@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/bffless/deploy-proxy-rules/compare/v1.3.0...v1.3.1) (2026-09-03)
+
+
+### Miscellaneous Chores
+
+* release 1.3.1 ([e0e0356](https://github.com/bffless/deploy-proxy-rules/commit/e0e0356659671e5e9eb519f41b716cc966371bf2))
+
 ## [1.3.0](https://github.com/bffless/deploy-proxy-rules/compare/v1.2.1...v1.3.0) (2026-08-27)
 
 
