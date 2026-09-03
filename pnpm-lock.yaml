@@ -15,8 +15,8 @@ importers:
         specifier: ^6.0.0
         version: 6.0.1
       bffless:
-        specifier: ^0.3.3
-        version: 0.3.3
+        specifier: ^0.3.6
+        version: 0.3.6
     devDependencies:
       '@types/node':
         specifier: ^20.11.0
@@ -589,8 +589,8 @@ packages:
   before-after-hook@2.2.3:
     resolution: {integrity: sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==}
 
-  bffless@0.3.3:
-    resolution: {integrity: sha512-vXhJAe1peC4PLhv+asp0+NAmjK8fGKl1l6rKhRXhwhRhmeI52I12Iv14YGg1VoLMorQEJ7NbPPieKWZt6LNmJw==}
+  bffless@0.3.6:
+    resolution: {integrity: sha512-LI0DeGH8gkoM6Oa0/GRzoRow9Mht9+4gKEWOB9nKHQBjAx1acf7/Ha1AoW4pFGifNacNSY4lyEwFYvCZ+XRgsg==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -1296,7 +1296,7 @@ snapshots:
 
   before-after-hook@2.2.3: {}
 
-  bffless@0.3.3:
+  bffless@0.3.6:
     dependencies:
       chokidar: 4.0.3
       commander: 12.1.0
